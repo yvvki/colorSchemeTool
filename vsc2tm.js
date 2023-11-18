@@ -1,6 +1,6 @@
-const json5 = require('json5')
-const plist = require('plist')
-const fs = require('fs')
+import json5 from 'json5';
+import plist from 'plist';
+import fs from 'fs';
 
 function convert(vscTheme) {
     const tmTheme = {
@@ -24,7 +24,7 @@ function convert(vscTheme) {
     mapper.addSetting("editor.foreground", "foreground");
     mapper.addSetting("editor.background", "background");
     mapper.addSetting("editorWhitespace.foreground", "invisibles");
-    for (i = 1; i < tmTheme.settings.length; i++) {
+    for (var i = 1; i < tmTheme.settings.length; i++) {
        const scope = tmTheme.settings[i].scope
        if (scope) {
            tmTheme.settings[i].scope = scope.toString()
