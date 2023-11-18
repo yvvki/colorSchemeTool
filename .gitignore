@@ -1,4 +1,5 @@
-.idea
-.DS_Store
-colorSchemeTool.log
+# Logs
+*.log
+
+# Dependency directories
 node_modules/
