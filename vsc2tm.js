@@ -4,13 +4,13 @@ import JSON5 from 'json5';
 import plist from 'plist';
 
 /**
- * Covert a VSCode into TextMate theme configuration
+ * Covert a VSCode into TextMate theme scheme
  * @param {Object} vscode
  * @param {string} vscode.name
  * @param {Object<string, string>} vscode.colors
  * @param {Object[]} vscode.tokenColors
  * @param {String[]} vscode.tokenColors.scope
- * @param {Object} vscode.tokenColors.settings
+ * @param {Object<string, string>} vscode.tokenColors.settings
  */
 export function convert(vscode) {
     const textmate = {
@@ -21,7 +21,9 @@ export function convert(vscode) {
     // Verify default settings, that is settings that don't have any scope.
     var defaultSettings = textmate.settings.find(setting => !setting.scope)
     if (!defaultSettings) {
-        defaultSettings = { settings: {} }
+        defaultSettings = {
+            settings: {}
+        }
         textmate.settings.unshift(defaultSettings);
     }
 
@@ -50,4 +52,5 @@ export default convert;
 
 const vscode = JSON5.parse(await fs.readFile(process.argv[2]));
 const textmate = convert(vscode);
+
 await fs.writeFile(process.argv[3], plist.build(textmate));
