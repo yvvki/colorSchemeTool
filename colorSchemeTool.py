@@ -37,27 +37,35 @@ def capitalize_colors(elem):
             capitalize_colors(elem)
 
 
-def hex_to_rgb(color):
+# https://stackoverflow.com/a/214657/14511192
+def hex_to_rgb255(color: str) -> tuple[int, int, int]:
     lv = len(color)
-    r = int(color[lv - 6 : lv - 4], 16) / 256 if lv >= 6 else 0
-    g = int(color[lv - 4 : lv - 2], 16) / 256 if lv >= 4 else 0
-    b = int(color[lv - 2 : lv], 16) / 256
-    return r, g, b
+    return tuple(int(color[i : i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
 
-def hex_to_yiq(color):
+def rgb255_to_rbg(r: int, g: int, b: int) -> tuple[float, float, float]:
+    return tuple(x / 255 for x in (r, g, b))
+
+
+def hex_to_rgb(color: str):
+    return rgb255_to_rbg(*hex_to_rgb255(color))
+
+
+def hex_to_yiq(color: str):
     return colorsys.rgb_to_yiq(*hex_to_rgb(color))
 
 
-def rgb256_to_hex(r, g, b):
-    return "{0:02x}{1:02x}{2:02x}".format(r, g, b)
+def rgb255_to_hex(r: int, g: int, b: int):
+    return "%02x%02x%02x" % (r, g, b)
 
 
-def rgb_to_hex(r, g, b):
-    r = min(int(r * 256), 255)
-    g = min(int(g * 256), 255)
-    b = min(int(b * 256), 255)
-    return rgb256_to_hex(r, g, b)
+# https://stackoverflow.com/a/46575472/14511192
+def rgb_to_rgb255(r: float, g: float, b: float) -> tuple[int, int, int]:
+    return tuple(round(x * 255) for x in (r, g, b))
+
+
+def rgb_to_hex(r: float, g: float, b: float):
+    return rgb255_to_hex(*rgb_to_rgb255(r, g, b))
 
 
 class AttributeValue:
@@ -71,11 +79,11 @@ class AttributeValue:
         effect_type=0,
     ):
         if foreground_rgb:
-            self.foreground = rgb256_to_hex(*foreground_rgb)
+            self.foreground = rgb255_to_hex(*foreground_rgb)
         else:
             self.foreground = foreground
         if background_rgb:
-            self.background = rgb256_to_hex(*background_rgb)
+            self.background = rgb255_to_hex(*background_rgb)
         else:
             self.background = background
         self.font_style = font_style
@@ -188,13 +196,13 @@ class Attribute:
             self.value = DerivedAttributeValue(parent=parent)
             if foreground:
                 self.value.default_fore = (
-                    rgb256_to_hex(*foreground)
+                    rgb255_to_hex(*foreground)
                     if foreground != IGNORE_COLOR
                     else IGNORE_COLOR_VALUE
                 )
             if background:
                 self.value.default_back = (
-                    rgb256_to_hex(*background)
+                    rgb255_to_hex(*background)
                     if background != IGNORE_COLOR
                     else IGNORE_COLOR_VALUE
                 )
