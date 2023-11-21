@@ -18,45 +18,36 @@ export function convert(vscode) {
         settings: vscode.tokenColors,
     }
 
-    const defaultSettings = textmate.settings.find(setting => !setting.scope);
-
+    // Verify default settings, that is settings that don't have any scope.
+    var defaultSettings = textmate.settings.find(setting => !setting.scope)
     if (!defaultSettings) {
-        textmate.settings.unshift({ settings: {} });
+        defaultSettings = { settings: {} }
+        textmate.settings.unshift(defaultSettings);
     }
 
-    const textmateDefaultSettings = textmate.settings[0].settings;
-    const vscodeColors = vscode.colors;
+    addSetting("editorCursor.foreground", "caret");
+    addSetting("editor.selectionBackground", "selection");
+    addSetting("editor.lineHighlightBackground", "lineHighlight");
+    addSetting("editor.foreground", "foreground");
+    addSetting("editor.background", "background");
+    addSetting("editorWhitespace.foreground", "invisibles");
 
-    const mapper = new SettingsMapper({ tmThemeDefaultSettings: textmateDefaultSettings, vscThemeColors: vscodeColors });
-    mapper.addSetting("editorCursor.foreground", "caret");
-    mapper.addSetting("editor.selectionBackground", "selection");
-    mapper.addSetting("editor.lineHighlightBackground", "lineHighlight");
-    mapper.addSetting("editor.foreground", "foreground");
-    mapper.addSetting("editor.background", "background");
-    mapper.addSetting("editorWhitespace.foreground", "invisibles");
-    for (var i = 1; i < textmate.settings.length; i++) {
-        const scope = textmate.settings[i].scope;
-        if (scope) {
-            textmate.settings[i].scope = scope.toString();
+    function addSetting(source, target) {
+        if (source in vscode.colors) {
+            defaultSettings.settings[target] = vscode.colors[source];
         }
     }
+
+    // Convert scope array to string with commas.
+    textmate.settings.forEach(setting => {
+        if (setting.scope) {
+            setting.scope = setting.scope.toString();
+        }
+    });
     return textmate;
 }
-export default convert
+export default convert;
 
-class SettingsMapper {
-    constructor({ textmateDefaultSettings, vscodeColors }) {
-        this.textmateDefaultSettings = textmateDefaultSettings;
-        this.vscodeColors = vscodeColors;
-    }
-
-    addSetting(source, target) {
-        if (source in this.vscodeColors) {
-            this.textmateDefaultSettings[target] = this.vscodeColors[source];
-        }
-    }
-}
-
-const vscode = JSON5.parse(await fs.readFile(process.argv[2], "utf8"));
+const vscode = JSON5.parse(await fs.readFile(process.argv[2]));
 const textmate = convert(vscode);
 await fs.writeFile(process.argv[3], plist.build(textmate));
