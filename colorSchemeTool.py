@@ -38,10 +38,10 @@ def capitalize_colors(elem):
 
 
 def hex_to_rgb(color):
-    l = len(color)
-    r = int(color[l - 6 : l - 4], 16) / 256 if l >= 6 else 0
-    g = int(color[l - 4 : l - 2], 16) / 256 if l >= 4 else 0
-    b = int(color[l - 2 : l], 16) / 256
+    lv = len(color)
+    r = int(color[lv - 6 : lv - 4], 16) / 256 if lv >= 6 else 0
+    g = int(color[lv - 4 : lv - 2], 16) / 256 if lv >= 4 else 0
+    b = int(color[lv - 2 : lv], 16) / 256
     return r, g, b
 
 
@@ -1092,12 +1092,12 @@ def attr_from_textmate(settings, old_value, background):
     result = AttributeValue()
 
     if ("foreground" in settings) and (
-        (old_value == None) or (old_value.default_fore != IGNORE_COLOR_VALUE)
+        (old_value is None) or (old_value.default_fore != IGNORE_COLOR_VALUE)
     ):
         result.foreground = color_from_textmate(settings["foreground"])
 
     if ("background" in settings) and (
-        (old_value == None) or (old_value.default_back != IGNORE_COLOR_VALUE)
+        (old_value is None) or (old_value.default_back != IGNORE_COLOR_VALUE)
     ):
         result.background = color_from_textmate(settings["background"], background)
 
@@ -1420,5 +1420,5 @@ write_idea_scheme(sys.argv[2])
 
 for setting in all_settings:
     scope = setting.get("scope", None)
-    if scope and not scope in used_scopes:
+    if scope and scope not in used_scopes:
         print("Unused scope: " + scope)
