@@ -14,8 +14,8 @@ IGNORE_COLOR_VALUE = "#IGNORE_COLOR"
 
 def capitalize_colors(root: ET.Element):
     # Find nodes with "value" attribute
-    for option in root.findall(".//*[@value]"):
-        option.set("value", option.get("value").upper())
+    for node in root.findall(".//*[@value]"):
+        node.set("value", node.get("value").upper())
 
 
 # https://stackoverflow.com/a/214657/14511192
@@ -1302,15 +1302,6 @@ def blend_with_as_rgb256(base_hex_color, blend_with_hex_color, blend_hex_alpha):
     return int(result[0] * 256), int(result[1] * 256), int(result[2] * 256)
 
 
-def underscore_to_camelcase(value):
-    def camelcase():
-        while True:
-            yield str.capitalize
-
-    c = camelcase()
-    return "".join(c.__next__()(x) if x else "_" for x in value.split("_"))
-
-
 def isDark():
     back = hex_to_rgb(text.value.background)
     intensity = (back[0] + back[1] + back[2]) / 3
@@ -1322,7 +1313,7 @@ def write_idea_scheme(filename):
     baseName = "Darcula" if isDark() else "Default"
     scheme = ET.Element(
         "scheme",
-        name=underscore_to_camelcase(name),
+        name=name,
         version="1",
         parent_scheme=baseName,
     )
