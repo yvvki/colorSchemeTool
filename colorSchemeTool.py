@@ -12,23 +12,6 @@ IGNORE_COLOR = (None, None, None)
 IGNORE_COLOR_VALUE = "#IGNORE_COLOR"
 
 
-# http://effbot.org/zone/element-lib.htm#prettyprint
-def indent(elem, level=0):
-    i = "\n" + level * "  "
-    if len(elem):
-        if not elem.text or not elem.text.strip():
-            elem.text = i + "  "
-        if not elem.tail or not elem.tail.strip():
-            elem.tail = i
-        for elem in elem:
-            indent(elem, level + 1)
-        if not elem.tail or not elem.tail.strip():
-            elem.tail = i
-    else:
-        if level and (not elem.tail or not elem.tail.strip()):
-            elem.tail = i
-
-
 def capitalize_colors(elem):
     if len(elem):
         for elem in elem:
@@ -1413,7 +1396,7 @@ def write_idea_scheme(filename):
             ET.SubElement(
                 attributes, "option", name=attr.id, baseAttributes=attr.parent.id
             )
-    indent(scheme)
+    ET.indent(scheme)
     capitalize_colors(scheme)
     ET.ElementTree(scheme).write(open(filename, "wb+"))
 
