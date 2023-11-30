@@ -1269,25 +1269,25 @@ def blend_spy_js_attributes(background):
     Attribute(
         "SPY-JS.FUNCTION_SCOPE",
         text,
-        background=blend_with_as_rgb256(background, "#FFFFF0", "04"),
+        background=blend_with_as_rgb255(background, "#FFFFF0", "04"),
         effect_type=2,
     )
     Attribute(
         "SPY-JS.PROGRAM_SCOPE",
         text,
-        background=blend_with_as_rgb256(background, "#FFFFFF", "04"),
+        background=blend_with_as_rgb255(background, "#FFFFFF", "04"),
         effect_type=2,
     )
     Attribute(
         "SPY-JS.EXCEPTION",
         text,
-        background=blend_with_as_rgb256(background, "#FFCCCC", "04"),
+        background=blend_with_as_rgb255(background, "#FFCCCC", "04"),
         effect_type=2,
     )
     Attribute(
         "SPY-JS.PATH_LEVEL_ONE",
         text,
-        background=blend_with_as_rgb256(background, "#E2FFE2", "04"),
+        background=blend_with_as_rgb255(background, "#E2FFE2", "04"),
         effect_type=2,
     )
     Attribute("SPY-JS.PATH_LEVEL_TWO", text, effect_type=1)
@@ -1295,17 +1295,16 @@ def blend_spy_js_attributes(background):
     return
 
 
-def blend_with_as_rgb256(base_hex_color, blend_with_hex_color, blend_hex_alpha):
+def blend_with_as_rgb255(base_hex_color, blend_with_hex_color, blend_hex_alpha):
     result = hex_to_rgb(
         color_from_textmate(base_hex_color + blend_hex_alpha, blend_with_hex_color)
     )
-    return int(result[0] * 256), int(result[1] * 256), int(result[2] * 256)
+    return rgb_to_rgb255(*result)
 
 
 def isDark():
-    back = hex_to_rgb(text.value.background)
-    intensity = (back[0] + back[1] + back[2]) / 3
-    return intensity < 0.5
+    _, lightness, _ = colorsys.rgb_to_hls(*hex_to_rgb(text.value.background))
+    return lightness <= 0.5
 
 
 def write_idea_scheme(filename):
