@@ -12,12 +12,10 @@ IGNORE_COLOR = (None, None, None)
 IGNORE_COLOR_VALUE = "#IGNORE_COLOR"
 
 
-def capitalize_colors(elem):
-    if len(elem):
-        for elem in elem:
-            if elem.get("value") is not None:
-                elem.set("value", elem.get("value").upper())
-            capitalize_colors(elem)
+def capitalize_colors(root: ET.Element):
+    # Find nodes with "value" attribute
+    for option in root.findall(".//*[@value]"):
+        option.set("value", option.get("value").upper())
 
 
 # https://stackoverflow.com/a/214657/14511192
