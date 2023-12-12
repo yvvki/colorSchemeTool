@@ -1,7 +1,7 @@
 #!/bin/bash
 
-VSC_FILES=./vscThemes/*.json
-TM_OUTDIR=./tmThemes/
+VSC_FILES=./vscode/*.json
+TM_OUTDIR=./textmate/
 
 shopt -s nullglob
 
@@ -16,8 +16,8 @@ do
 done
 
 
-TM_FILES=./tmThemes/*.tmTheme
-IJ_OUTDIR=./intellijThemes/
+TM_FILES=./textmate/*.tmTheme
+IJ_OUTDIR=./intellij/
 
 shopt -s nullglob
 

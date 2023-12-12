@@ -1,5 +1,5 @@
-$VSC_FILES = Get-ChildItem .\vscThemes\*.json
-$TM_OUTDIR = ".\tmThemes\"
+$VSC_FILES = Get-ChildItem .\vscode\*.json
+$TM_OUTDIR = ".\textmate\"
 
 foreach ($file in $VSC_FILES) {
     $outFile = $file.Name -replace ".json", ".tmTheme"
@@ -8,8 +8,8 @@ foreach ($file in $VSC_FILES) {
     node vsc2tm.js $file $outFile | Out-File .\colorSchemeTool.log
 }
 
-$TM_FILES = Get-ChildItem .\tmThemes\*.tmTheme
-$IJ_OUTDIR = ".\intellijThemes\"
+$TM_FILES = Get-ChildItem .\textmate\*.tmTheme
+$IJ_OUTDIR = ".\intellij\"
 
 foreach ($file in $TM_FILES) {
     $outFile = $file.Name -replace ".tmTheme", ".xml"
