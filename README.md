@@ -10,9 +10,9 @@ Note that the tool requires Python version 2.7. The default version of Python in
 **Note:** please check if the desired theme already exists in the [JetBrains plugin repository](https://plugins.jetbrains.com/) before converting it.
 1. Clone the `colorSchemeTool` code.
 2. Download the JSON file with the VS Code theme you’d like to convert.
-3. Move the JSON file to the `vscThemes` folder under `colorSchemeTool`.
+3. Move the JSON file to the `vscode` folder under `colorSchemeTool`.
 4. Run the `convert.sh` script.
-5. Check the `intellijThemes` folder – you should find a new `.icls` file there.
+5. Check the `intellij` folder – you should find a new `.icls` file there.
 
 
 ## How to apply converted theme
