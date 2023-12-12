@@ -4,8 +4,9 @@ import plistlib
 import os.path
 import sys
 
-type IntColor = tuple[int, int, int]
-type FloatColor = tuple[float, float, float]
+type IntRGB = tuple[int, int, int]
+type IntRGBA = tuple[int, int, int, int]
+type FloatRGB = tuple[float, float, float]
 
 default_attributes = {}
 all_attributes = []
@@ -21,12 +22,16 @@ def capitalize_colors(root: ET.Element):
 
 
 # https://stackoverflow.com/a/214657/14511192
-def hex_to_rgb255(color: str) -> IntColor:
-    lv = len(color)
-    return tuple(int(color[i : i + lv // 3], 16) for i in range(0, lv, lv // 3))
+def hex_to_rgb255(value: str) -> IntRGB:
+    value = value.lstrip("#")
+    lv = len(value)
+    if lv % 3 != 0:
+        raise ValueError("Value must be a 3-tuple")
+
+    return tuple(int(value[i : i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
 
-def rgb255_to_rbg(r: int, g: int, b: int) -> FloatColor:
+def rgb255_to_rbg(r: int, g: int, b: int) -> FloatRGB:
     return tuple(x / 255 for x in (r, g, b))
 
 
@@ -43,7 +48,7 @@ def rgb255_to_hex(r: int, g: int, b: int):
 
 
 # https://stackoverflow.com/a/46575472/14511192
-def rgb_to_rgb255(r: float, g: float, b: float) -> IntColor:
+def rgb_to_rgb255(r: float, g: float, b: float) -> IntRGB:
     return tuple(round(x * 255) for x in (r, g, b))
 
 
@@ -54,16 +59,16 @@ def rgb_to_hex(r: float, g: float, b: float):
 class AttributeValue:
     def __init__(
         self,
-        foreground: str | IntColor,
-        background: str | IntColor,
+        foreground: str | IntRGB,
+        background: str | IntRGB,
         font_style: int = 0,
         effect_type: int = 0,
     ) -> None:
-        if foreground is IntColor:
+        if foreground is IntRGB:
             self.foreground = rgb255_to_hex(*foreground)
         else:
             self.foreground = foreground
-        if background is IntColor:
+        if background is IntRGB:
             self.background = rgb255_to_hex(*background)
         else:
             self.background = background
