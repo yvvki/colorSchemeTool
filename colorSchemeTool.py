@@ -1,3 +1,4 @@
+from __future__ import annotations
 from colorsys import rgb_to_yiq, yiq_to_rgb, rgb_to_hls
 import xml.etree.cElementTree as ET
 import plistlib
@@ -8,11 +9,10 @@ type IntRGB = tuple[int, int, int]
 type IntRGBA = tuple[int, int, int, int]
 type FloatRGB = tuple[float, float, float]
 
-default_attributes = {}
-all_attributes = []
-all_colors = {}
 IGNORE_COLOR = (None, None, None)
 IGNORE_COLOR_VALUE = "#IGNORE_COLOR"
+
+all_colors = {}
 
 
 def capitalize_colors(root: ET.Element):
@@ -82,12 +82,12 @@ class AttributeValue:
 class DerivedAttributeValue:
     def __init__(
         self,
-        parent=None,
+        parent: Attribute | None = None,
         default_fore=None,
         default_back=None,
         default_font=0,
         error_stripe=None,
-    ):
+    ) -> None:
         self.parent = parent
         self.default_fore = default_fore
         self.default_back = default_back
@@ -101,8 +101,8 @@ class DerivedAttributeValue:
         p = self.parent
         while not p.value.background:
             p = p.parent
-        py, pi, pq = hex_to_yiq(p.value.background)
-        return py < 0.5
+        luma, _, _ = hex_to_yiq(p.value.background)
+        return luma < 0.5
 
     @property
     def inherited(self):
@@ -158,52 +158,53 @@ class DerivedAttributeValue:
 
 
 class Attribute:
+    all: list[Attribute] = []
+    default: dict[str, Attribute] = {}
+
     def __init__(
         self,
-        id,
-        parent,
+        id: str,
+        parent: Attribute | None,
         scope=None,
         foreground=None,
         background=None,
         font_style=0,
         effect_type=None,
-    ):
+    ) -> None:
         self.id = id
         self.parent = parent
         self.scope = scope
-        if id in default_attributes:
-            self.value = default_attributes[id]
+        if id in Attribute.default:
+            self.value = Attribute.default[id]
             if background == IGNORE_COLOR:
                 self.value.default_back = IGNORE_COLOR_VALUE
             if foreground == IGNORE_COLOR:
                 self.value.default_fore = IGNORE_COLOR_VALUE
             self.value.parent = parent
         else:
-            self.value = DerivedAttributeValue(parent=parent)
+            self.value = DerivedAttributeValue(parent)
             if foreground:
-                self.value.default_fore = (
-                    rgb255_to_hex(*foreground)
-                    if foreground != IGNORE_COLOR
-                    else IGNORE_COLOR_VALUE
-                )
+                if foreground == IGNORE_COLOR:
+                    self.value.default_fore = IGNORE_COLOR_VALUE
+                else:
+                    self.value.default_fore = rgb255_to_hex(*foreground)
             if background:
-                self.value.default_back = (
-                    rgb255_to_hex(*background)
-                    if background != IGNORE_COLOR
-                    else IGNORE_COLOR_VALUE
-                )
+                if background == IGNORE_COLOR:
+                    self.value.default_back = IGNORE_COLOR_VALUE
+                else:
+                    self.value.default_back = rgb255_to_hex(*background)
             if font_style:
                 self.value.default_font = font_style
             if effect_type:
                 self.value.effect_type = effect_type
-        all_attributes.append(self)
+        Attribute.all.append(self)
 
 
 text = Attribute("TEXT", None)
 
 
-def load_default_attributes(scheme_path):
-    scheme = ET.ElementTree(file=scheme_path)
+def load_default_attributes(file: str):
+    scheme = ET.ElementTree(file=file)
     attributes = scheme.findall(".//attributes/option")
     for attr in attributes:
         name = attr.attrib.get("name")
@@ -226,7 +227,7 @@ def load_default_attributes(scheme_path):
                 attr_value.effect_type = int(option_value)
             if option_name == "EFFECT_COLOR":
                 attr_value.default_effect_color = option_value
-        default_attributes[name] = attr_value
+        Attribute.default[name] = attr_value
 
 
 load_default_attributes("DefaultColorSchemesManager.xml")
@@ -1257,7 +1258,7 @@ def load_textmate_scheme(tmtheme):
     if background is not None:
         blend_spy_js_attributes(background)
 
-    for attr in all_attributes:
+    for attr in Attribute.all:
         if attr.scope:
             settings = find_by_scope(all_settings, attr.scope)
             if settings:
@@ -1335,9 +1336,9 @@ def write_idea_scheme(filename):
     attributes = ET.SubElement(scheme, "attributes")
 
     # let's sort attributes, then diffs between generated schemes will look nice
-    all_attributes.sort(key=lambda attr: attr.id)
+    Attribute.all.sort(key=lambda attr: attr.id)
 
-    for attr in all_attributes:
+    for attr in Attribute.all:
         if attr.value.inherited:
             print("inheriting " + attr.id + " from " + attr.parent.id)
         elif isinstance(attr.value, DerivedAttributeValue):
