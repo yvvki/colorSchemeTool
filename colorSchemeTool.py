@@ -1,9 +1,11 @@
-from __future__ import division
-import colorsys
+from colorsys import rgb_to_yiq, yiq_to_rgb, rgb_to_hls
 import xml.etree.cElementTree as ET
 import plistlib
 import os.path
 import sys
+
+type IntColor = tuple[int, int, int]
+type FloatColor = tuple[float, float, float]
 
 default_attributes = {}
 all_attributes = []
@@ -19,12 +21,12 @@ def capitalize_colors(root: ET.Element):
 
 
 # https://stackoverflow.com/a/214657/14511192
-def hex_to_rgb255(color: str) -> tuple[int, int, int]:
+def hex_to_rgb255(color: str) -> IntColor:
     lv = len(color)
     return tuple(int(color[i : i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
 
-def rgb255_to_rbg(r: int, g: int, b: int) -> tuple[float, float, float]:
+def rgb255_to_rbg(r: int, g: int, b: int) -> FloatColor:
     return tuple(x / 255 for x in (r, g, b))
 
 
@@ -33,7 +35,7 @@ def hex_to_rgb(color: str):
 
 
 def hex_to_yiq(color: str):
-    return colorsys.rgb_to_yiq(*hex_to_rgb(color))
+    return rgb_to_yiq(*hex_to_rgb(color))
 
 
 def rgb255_to_hex(r: int, g: int, b: int):
@@ -41,7 +43,7 @@ def rgb255_to_hex(r: int, g: int, b: int):
 
 
 # https://stackoverflow.com/a/46575472/14511192
-def rgb_to_rgb255(r: float, g: float, b: float) -> tuple[int, int, int]:
+def rgb_to_rgb255(r: float, g: float, b: float) -> IntColor:
     return tuple(round(x * 255) for x in (r, g, b))
 
 
@@ -113,7 +115,7 @@ class DerivedAttributeValue:
             dy = 1 - dy
             if dy < 0.5:
                 dy += add_luma
-            r, g, b = colorsys.yiq_to_rgb(dy, di, dq)
+            r, g, b = yiq_to_rgb(dy, di, dq)
             return rgb_to_hex(r, g, b)
         return default_value
 
@@ -1234,7 +1236,7 @@ def load_textmate_scheme(tmtheme):
             y /= 2
         else:
             y += 0.2
-        caret_row_color = rgb_to_hex(*colorsys.yiq_to_rgb(y, i, q))
+        caret_row_color = rgb_to_hex(*yiq_to_rgb(y, i, q))
 
     if caret_row_color is not None:
         all_colors["CARET_ROW_COLOR"] = caret_row_color
@@ -1303,7 +1305,7 @@ def blend_with_as_rgb255(base_hex_color, blend_with_hex_color, blend_hex_alpha):
 
 
 def isDark():
-    _, lightness, _ = colorsys.rgb_to_hls(*hex_to_rgb(text.value.background))
+    _, lightness, _ = rgb_to_hls(*hex_to_rgb(text.value.background))
     return lightness <= 0.5
 
 
