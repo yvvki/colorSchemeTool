@@ -54,19 +54,17 @@ def rgb_to_hex(r: float, g: float, b: float):
 class AttributeValue:
     def __init__(
         self,
-        foreground=None,
-        background=None,
-        foreground_rgb=None,
-        background_rgb=None,
-        font_style=0,
-        effect_type=0,
-    ):
-        if foreground_rgb:
-            self.foreground = rgb255_to_hex(*foreground_rgb)
+        foreground: str | IntColor,
+        background: str | IntColor,
+        font_style: int = 0,
+        effect_type: int = 0,
+    ) -> None:
+        if foreground is IntColor:
+            self.foreground = rgb255_to_hex(*foreground)
         else:
             self.foreground = foreground
-        if background_rgb:
-            self.background = rgb255_to_hex(*background_rgb)
+        if background is IntColor:
+            self.background = rgb255_to_hex(*background)
         else:
             self.background = background
         self.font_style = font_style
@@ -1079,25 +1077,33 @@ def font_style_from_textmate(style):
     return result
 
 
-def attr_from_textmate(settings, old_value, background):
-    result = AttributeValue()
-
-    if ("foreground" in settings) and (
+def attr_from_textmate(settings, old_value: DerivedAttributeValue, background):
+    foreground = None
+    background = None
+    if "foreground" in settings and (
         (old_value is None) or (old_value.default_fore != IGNORE_COLOR_VALUE)
     ):
-        result.foreground = color_from_textmate(settings["foreground"])
+        foreground = color_from_textmate(settings["foreground"])
 
-    if ("background" in settings) and (
+    if "background" in settings and (
         (old_value is None) or (old_value.default_back != IGNORE_COLOR_VALUE)
     ):
-        result.background = color_from_textmate(settings["background"], background)
+        background = color_from_textmate(settings["background"], background)
 
+    font_style = 0
+    effect_type = 0
     if "fontStyle" in settings:
         tm_font_style = settings["fontStyle"]
-        result.font_style = font_style_from_textmate(tm_font_style)
+        font_style = font_style_from_textmate(tm_font_style)
         if "underline" in tm_font_style:
-            result.effect_type = 1
-    return result
+            effect_type = 1
+
+    return AttributeValue(
+        foreground,
+        background,
+        font_style,
+        effect_type,
+    )
 
 
 def find_by_scope(settings, scope):
