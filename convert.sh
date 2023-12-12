@@ -12,7 +12,7 @@ do
     BASE="${FN%.[^.]*}"
     EXT="${FN:${#BASE} + 1}"
     echo converting $DIR$FN to $TM_OUTDIR$BASE.tmTheme ...
-	node vscToTm.js "$FILE" "$TM_OUTDIR$BASE.tmTheme" >> ./colorSchemeTool.log
+	node vsc2tm.js "$FILE" "$TM_OUTDIR$BASE.tmTheme" >> ./colorSchemeTool.log
 done
 
 
